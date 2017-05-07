@@ -1,26 +1,38 @@
+{-# LANGUAGE ApplicativeDo #-}
+
 module Search 
-    ( search )
+    ( search 
+    , searchMain
+    )
     where
 
 import Type
-import Factory
+import Factory as F
 import Data.Monoid ((<>))
 
-search spd acc wgt hdl grip = do
-    cc <- characters
-    ab <- allBodies
-    tt <- tires
-    gg <- gliders
-    let candidates = [c <> b <> t <> g | c <- cc, b <- ab, t <- tt, g <- gg]
-        model = createBasicModel spd acc wgt hdl grip
-        createBasicModel spd acc wgt hdl grip =
-                Object { name = ""
-                      , description = ""
-                      , speed = Values spd 0 0 0
-                      , acceleration = acc
-                      , weight = wgt
-                      , handling = Values hdl 0 0 0
-                      , traction = grip
-                      , miniTurbo = 0
-                     }
-    return $ filter (model <) candidates
+search :: Object -> [Object] -> [Object] -> [Object] -> [Object] -> [Object]
+search standard characters bodies tires gliders =
+    let candidates = [c <> b <> t <> g | c <- characters, b <- bodies, t <- tires, g <- gliders]
+    in filter (standard <) candidates
+
+
+searchMain spdG spdW spdA spdAG acc wgt hdlG hdlW hdlA hdlAG grip miniTurbo favorateChars favorateBodies favorateTires favorateGliders = do
+    allCharacters <- F.characters
+    allBodies <- F.allBodies
+    allTires <- F.tires
+    allGliders <- F.gliders
+    let standard = Object { name = ""
+                          , description = ""
+                          , speed = Values spdG spdW spdA spdAG
+                          , acceleration = acc
+                          , weight = wgt
+                          , handling = Values hdlG hdlW hdlA hdlAG
+                          , traction = grip
+                          , miniTurbo = miniTurbo
+                         }
+        characters = if (length favorateChars == 0) then allCharacters else favorateChars
+        bodies = if (length favorateBodies == 0) then allBodies else favorateBodies
+        tires = if (length favorateTires == 0) then allTires else favorateTires
+        gliders = if (length favorateGliders == 0) then allGliders else favorateGliders
+    
+    return $ search standard characters bodies tires gliders

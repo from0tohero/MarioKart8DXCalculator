@@ -43,7 +43,6 @@ parseItem args =
            , miniTurbo = (read $ args!!12)
        }
 
-
 loadFromFile :: String -> IO [Object]
 loadFromFile filename = do
     content <- readFile filename
